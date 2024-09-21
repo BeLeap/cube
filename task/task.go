@@ -1,5 +1,7 @@
 package task
 
+import "github.com/google/uuid"
+
 type State int
 
 const (
@@ -9,3 +11,9 @@ const (
   Completed
   Failed
 )
+
+type Task struct {
+  ID uuid.UUID
+  Name string
+  State State
+}
