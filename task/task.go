@@ -1,8 +1,10 @@
 package task
 
 import (
-  "github.com/google/uuid"
-  "github.com/docker/go-connections/nat"
+	"time"
+
+	"github.com/docker/go-connections/nat"
+	"github.com/google/uuid"
 )
 
 type State int
@@ -25,4 +27,6 @@ type Task struct {
   ExposedPort nat.PortSet
   PortBindings map[string]string
   RestartPolicy string
+  StartTime time.Time
+  FinishTime time.Time
 }
