@@ -24,7 +24,7 @@ type Task struct {
 	Image         string
 	Memory        int
 	Disk          int
-	ExposedPort   nat.PortSet
+	ExposedPorts  nat.PortSet
 	PortBindings  map[string]string
 	RestartPolicy string
 	StartTime     time.Time
