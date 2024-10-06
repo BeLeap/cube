@@ -10,30 +10,30 @@ import (
 type State int
 
 const (
-  Pending State = iota
-  Scheduled
-  Running
-  Completed
-  Failed
+	Pending State = iota
+	Scheduled
+	Running
+	Completed
+	Failed
 )
 
 type Task struct {
-  ID uuid.UUID
-  Name string
-  State State
-  Image string
-  Memory int
-  Disk int
-  ExposedPort nat.PortSet
-  PortBindings map[string]string
-  RestartPolicy string
-  StartTime time.Time
-  FinishTime time.Time
+	ID            uuid.UUID
+	Name          string
+	State         State
+	Image         string
+	Memory        int
+	Disk          int
+	ExposedPort   nat.PortSet
+	PortBindings  map[string]string
+	RestartPolicy string
+	StartTime     time.Time
+	FinishTime    time.Time
 }
 
 type TaskEvent struct {
-  ID uuid.UUID
-  State State
-  Timestamp time.Time
-  Task Task
+	ID        uuid.UUID
+	State     State
+	Timestamp time.Time
+	Task      Task
 }
