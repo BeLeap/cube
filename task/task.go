@@ -8,8 +8,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/go-connections/nat"
@@ -93,7 +93,7 @@ func NewDocker(c *Config) *Docker {
 
 func (d *Docker) Run() DockerResult {
 	ctx := context.Background()
-	reader, err := d.Client.ImagePull(ctx, d.Config.Image, image.PullOptions{})
+	reader, err := d.Client.ImagePull(ctx, d.Config.Image, types.ImagePullOptions{})
 	if err != nil {
 		log.Printf("Error pulling image %s: %v\n", d.Config.Image, err)
 		return DockerResult{Error: err}
@@ -101,7 +101,7 @@ func (d *Docker) Run() DockerResult {
 	io.Copy(os.Stdout, reader)
 
 	rp := container.RestartPolicy{
-		Name: container.RestartPolicyMode(d.Config.RestartPolicy),
+		Name: d.Config.RestartPolicy,
 	}
 
 	r := container.Resources{
@@ -128,13 +128,13 @@ func (d *Docker) Run() DockerResult {
 		return DockerResult{Error: err}
 	}
 
-	err = d.Client.ContainerStart(ctx, resp.ID, container.StartOptions{})
+	err = d.Client.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
 	if err != nil {
 		log.Printf("Error starting container %s: %v\n", resp.ID, err)
 		return DockerResult{Error: err}
 	}
 
-	out, err := d.Client.ContainerLogs(ctx, resp.ID, container.LogsOptions{ShowStdout: true, ShowStderr: true})
+	out, err := d.Client.ContainerLogs(ctx, resp.ID, types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true})
 	if err != nil {
 		log.Printf("Error getting logs for container %s: %v\n", resp.ID, err)
 		return DockerResult{Error: err}
@@ -153,7 +153,7 @@ func (d *Docker) Stop(id string) DockerResult {
 		return DockerResult{Error: err}
 	}
 
-	err = d.Client.ContainerRemove(ctx, id, container.RemoveOptions{RemoveVolumes: true, RemoveLinks: false, Force: false})
+	err = d.Client.ContainerRemove(ctx, id, types.ContainerRemoveOptions{RemoveVolumes: true, RemoveLinks: false, Force: false})
 	if err != nil {
 		log.Printf("Error removing container %s: %v\n", id, err)
 		return DockerResult{Error: err}
