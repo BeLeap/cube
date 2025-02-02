@@ -19,8 +19,17 @@ type Manager struct {
 	LastWorker int
 }
 
-func (m *Manager) SelectWorker() {
-	fmt.Println("I will select an appropriate worker.")
+func (m *Manager) SelectWorker() string {
+	var newWorker int
+	if m.LastWorker+1 < len(m.Workers) {
+		newWorker = m.LastWorker + 1
+		m.LastWorker++
+	} else {
+		newWorker = 0
+		m.LastWorker = 0
+	}
+
+	return m.Workers[newWorker]
 }
 
 func (m *Manager) UpdateTasks() {
