@@ -133,3 +133,7 @@ func (m *Manager) SendWork() {
 		log.Println("No work in the queue")
 	}
 }
+
+func (m *Manager) AddTask(te task.TaskEvent) {
+	m.Pending.Enqueue(te)
+}
