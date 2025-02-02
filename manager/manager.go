@@ -1,7 +1,9 @@
 package manager
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 
 	"beleap.dev/cube/task"
 	"github.com/golang-collections/collections/queue"
@@ -37,5 +39,26 @@ func (m *Manager) UpdateTasks() {
 }
 
 func (m *Manager) SendWork() {
-	fmt.Println("I will send work to workers")
+	if m.Pending.Len() > 0 {
+		w := m.SelectWorker()
+
+		e := m.Pending.Dequeue()
+		te := e.(task.TaskEvent)
+
+		t := te.Task
+		log.Printf("Pulled %v off pending queue\n", t)
+
+		m.EventDb[te.ID] = &te
+
+		m.WorkerTaskMap[w] = append(m.WorkerTaskMap[w], te.Task.ID)
+		m.TaskWorkerMap[t.ID] = w
+
+		t.State = task.Scheduled
+		m.TaskDb[t.ID] = &t
+
+		data, err := json.Marshal(te)
+		if err != nil {
+			log.Printf("Unable to marshal task object: %v.\n", t)
+		}
+	}
 }
