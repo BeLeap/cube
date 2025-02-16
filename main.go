@@ -26,15 +26,15 @@ func main() {
 		Queue: *queue.New(),
 		Db:    make(map[uuid.UUID]*task.Task),
 	}
-	api := worker.Api{
-		Address: host,
-		Port:    port,
+	wapi := worker.Api{
+		Address: whost,
+		Port:    wport,
 		Worker:  &w,
 	}
 
 	go w.RunTasks()
 	go w.CollectStats()
-	go api.Start()
+	go wapi.Start()
 
 	workers := []string{fmt.Sprintf("%s:%d", host, port)}
 	m := manager.New(workers)
