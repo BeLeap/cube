@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"beleap.dev/cube/task"
 	"beleap.dev/cube/worker"
@@ -37,7 +38,7 @@ func (m *Manager) SelectWorker() string {
 	return m.Workers[newWorker]
 }
 
-func (m *Manager) UpdateTasks() {
+func (m *Manager) updateTasks() {
 	for _, worker := range m.Workers {
 		log.Printf("Checking worker %v for task updates\n", worker)
 		url := fmt.Sprintf("http://%s/tasks", worker)
@@ -77,6 +78,16 @@ func (m *Manager) UpdateTasks() {
 			m.TaskDb[t.ID].FinishTime = t.FinishTime
 			m.TaskDb[t.ID].ContainerID = t.ContainerID
 		}
+	}
+}
+
+func (m *Manager) UpdateTasks() {
+	for {
+		log.Println("Checking for task updates from workers")
+		m.updateTasks()
+		log.Println("Task updates completed")
+		log.Println("Sleeping for 15 seconds")
+		time.Sleep(15 * time.Second)
 	}
 }
 
