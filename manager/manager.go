@@ -157,6 +157,13 @@ func (m *Manager) GetTasks() []*task.Task {
 	return tasks
 }
 
+func (m *Manager) ProcessTasks() {
+	log.Println("Processing any task in the queue")
+	m.SendWork()
+	log.Println("Sleeping for 10 seconds")
+	time.Sleep(10 * time.Second)
+}
+
 func New(workers []string) *Manager {
 	taskDb := make(map[uuid.UUID]*task.Task)
 	eventDb := make(map[uuid.UUID]*task.TaskEvent)
