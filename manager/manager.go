@@ -218,3 +218,18 @@ func getHostPort(ports nat.PortMap) *string {
 	}
 	return nil
 }
+
+func (m *Manager) doHealthChecks() {
+	for _, t := range m.GetTasks() {
+		if t.State == task.Running && t.RestartCount < 3 {
+			err := m.checkTaskHealth(*t)
+			if err != nil {
+				if t.RestartCount < 3 {
+					m.restartTask(t)
+				}
+			}
+		} else if t.State == task.Failed && t.RestartCount < 3 {
+			m.restartTask(t)
+		}
+	}
+}
