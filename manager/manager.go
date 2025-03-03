@@ -233,3 +233,50 @@ func (m *Manager) doHealthChecks() {
 		}
 	}
 }
+
+func (m *Manager) restartTask(t *task.Task) {
+	w := m.TaskWorkerMap[t.ID]
+	t.State = task.Scheduled
+	t.RestartCount++
+	m.TaskDb[t.ID] = t
+
+	te := task.TaskEvent{
+		ID:        uuid.New(),
+		State:     task.Running,
+		Timestamp: time.Now(),
+		Task:      *t,
+	}
+	data, err := json.Marshal(te)
+	if err != nil {
+		log.Printf("Unable to marshal task object: %v.\n", t)
+		return
+	}
+
+	url := fmt.Sprintf("http://%s/tasks", w)
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
+	if err != nil {
+		log.Printf("Error connecting to %v: %v\n", w, err)
+		m.Pending.Enqueue(t)
+		return
+	}
+
+	d := json.NewDecoder(resp.Body)
+	if resp.StatusCode != http.StatusCreated {
+		e := worker.ErrResponse{}
+		err := d.Decode(&e)
+		if err != nil {
+			fmt.Printf("Error decoding response: %s\n", err.Error())
+			return
+		}
+		log.Printf("Response error (%d): %s", e.HTTPStatusCode, e.Message)
+		return
+	}
+
+	newTask := task.Task{}
+	err = d.Decode(&newTask)
+	if err != nil {
+		fmt.Printf("Error decoding response: %s\n", err.Error())
+		return
+	}
+	log.Printf("%#v\n", t)
+}
