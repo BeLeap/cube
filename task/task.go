@@ -168,9 +168,8 @@ type DockerInspectResponse struct {
 }
 
 func (d *Docker) Inspect(containerID string) DockerInspectResponse {
-	dc, _ := client.NewClientWithOpts(client.FromEnv)
 	ctx := context.Background()
-	resp, err := dc.ContainerInspect(ctx, containerID)
+	resp, err := d.Client.ContainerInspect(ctx, containerID)
 	if err != nil {
 		log.Printf("Error inspecting container: %s\n", err)
 		return DockerInspectResponse{Error: err}
