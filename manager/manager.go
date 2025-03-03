@@ -12,6 +12,7 @@ import (
 
 	"beleap.dev/cube/task"
 	"beleap.dev/cube/worker"
+	"github.com/docker/go-connections/nat"
 	"github.com/golang-collections/collections/queue"
 	"github.com/google/uuid"
 )
@@ -208,5 +209,12 @@ func (m *Manager) checkTaskHealth(t task.Task) error {
 
 	log.Printf("Task %s health check response: %v\n", t.ID, resp.StatusCode)
 
+	return nil
+}
+
+func getHostPort(ports nat.PortMap) *string {
+	for k, _ := range ports {
+		return &ports[k][0].HostPort
+	}
 	return nil
 }
