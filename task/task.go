@@ -83,6 +83,7 @@ func NewConfig(t *Task) *Config {
 		Name:          t.Name,
 		Image:         t.Image,
 		RestartPolicy: t.RestartPolicy,
+		ExposedPorts:  t.ExposedPorts,
 	}
 }
 
