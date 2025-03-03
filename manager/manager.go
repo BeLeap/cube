@@ -3,9 +3,11 @@ package manager
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"beleap.dev/cube/task"
@@ -181,4 +183,30 @@ func New(workers []string) *Manager {
 		WorkerTaskMap: workerTaskMap,
 		TaskWorkerMap: taskWorkerMap,
 	}
+}
+
+func (m *Manager) checkTaskHealth(t task.Task) error {
+	log.Printf("Calling health check for task %s: %s\n", t.ID, t.HealthCheck)
+	w := m.TaskWorkerMap[t.ID]
+	hostPort := getHostPort(t.HostPorts)
+	worker := strings.Split(w, ":")
+	url := fmt.Sprintf("http://%s:%s%s", worker[0], *hostPort, t.HealthCheck)
+
+	log.Printf("Calling health check for task %s: %s\n", t.ID, url)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		msg := fmt.Sprintf("Error connecting to health check %s", url)
+		log.Println(msg)
+		return errors.New(msg)
+	}
+	if resp.StatusCode != http.StatusOK {
+		msg := fmt.Sprintf("Error health check for task %s did not return 200", t.ID)
+		log.Println(msg)
+		return errors.New(msg)
+	}
+
+	log.Printf("Task %s health check response: %v\n", t.ID, resp.StatusCode)
+
+	return nil
 }
