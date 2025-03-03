@@ -161,10 +161,12 @@ func (m *Manager) GetTasks() []*task.Task {
 }
 
 func (m *Manager) ProcessTasks() {
-	log.Println("Processing any task in the queue")
-	m.SendWork()
-	log.Println("Sleeping for 10 seconds")
-	time.Sleep(10 * time.Second)
+	for {
+		log.Println("Processing any task in the queue")
+		m.SendWork()
+		log.Println("Sleeping for 10 seconds")
+		time.Sleep(10 * time.Second)
+	}
 }
 
 func New(workers []string) *Manager {
