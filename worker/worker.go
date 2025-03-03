@@ -127,3 +127,13 @@ func (w *Worker) InspectTask(t task.Task) task.DockerInspectResponse {
 	d := task.NewDocker(config)
 	return d.Inspect(t.ContainerID)
 }
+
+func (w *Worker) UpdateTasks() {
+	for {
+		log.Println("Checking status of tasks")
+		w.updateTasks()
+		log.Println("Task updates completed")
+		log.Println("Sleeping for 15 seconds")
+		time.Sleep(15 * time.Second)
+	}
+}
