@@ -16,7 +16,22 @@ type RoundRobin struct {
 
 // Pick implements Scheduler.
 func (r *RoundRobin) Pick(scores map[string]float64, candidates []*node.Node) *node.Node {
-	panic("unimplemented")
+	var bestNode *node.Node
+	var lowestScore float64
+	for idx, node := range candidates {
+		if idx == 0 {
+			bestNode = node
+			lowestScore = scores[node.Name]
+			continue
+		}
+
+		if scores[node.Name] < lowestScore {
+			bestNode = node
+			lowestScore = scores[node.Name]
+		}
+	}
+
+	return bestNode
 }
 
 // Score implements Scheduler.
