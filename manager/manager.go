@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"beleap.dev/cube/node"
+	"beleap.dev/cube/scheduler"
 	"beleap.dev/cube/task"
 	"beleap.dev/cube/worker"
 	"github.com/docker/go-connections/nat"
@@ -26,6 +28,9 @@ type Manager struct {
 	TaskWorkerMap map[uuid.UUID]string
 
 	LastWorker int
+
+	WorkerNodes []*node.Node
+	Scheduler   scheduler.Scheduler
 }
 
 func (m *Manager) SelectWorker() string {
