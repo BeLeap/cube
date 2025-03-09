@@ -100,18 +100,19 @@ func (m *Manager) UpdateTasks() {
 
 func (m *Manager) SendWork() {
 	if m.Pending.Len() > 0 {
-		w := m.SelectWorker()
-
 		e := m.Pending.Dequeue()
 		te := e.(task.TaskEvent)
+		m.EventDb[te.ID] = &te
+		log.Printf("Pulled %v off pending queue\n", te)
 
 		t := te.Task
-		log.Printf("Pulled %v off pending queue\n", t)
+		w, err := m.SelectWorker(t)
+		if err != nil {
+			log.Printf("error selecting worker for task %s: %v\n", t.ID, err)
+		}
 
-		m.EventDb[te.ID] = &te
-
-		m.WorkerTaskMap[w] = append(m.WorkerTaskMap[w], te.Task.ID)
-		m.TaskWorkerMap[t.ID] = w
+		m.WorkerTaskMap[w.Name] = append(m.WorkerTaskMap[w.Name], te.Task.ID)
+		m.TaskWorkerMap[t.ID] = w.Name
 
 		t.State = task.Scheduled
 		m.TaskDb[t.ID] = &t
@@ -121,7 +122,7 @@ func (m *Manager) SendWork() {
 			log.Printf("Unable to marshal task object: %v.\n", t)
 		}
 
-		url := fmt.Sprintf("http://%s/tasks", w)
+		url := fmt.Sprintf("http://%s/tasks", w.Name)
 		resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
 		if err != nil {
 			log.Printf("Error connecting to %v: %v\n", w, err)
