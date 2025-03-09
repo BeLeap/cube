@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"beleap.dev/cube/stats"
 	"beleap.dev/cube/task"
 	"github.com/golang-collections/collections/queue"
 	"github.com/google/uuid"
@@ -17,13 +18,13 @@ type Worker struct {
 	Db        map[uuid.UUID]*task.Task
 	TaskCount int
 
-	Stats *Stats
+	Stats *stats.Stats
 }
 
 func (w *Worker) CollectStats() {
 	for {
 		log.Println("Collecting stats")
-		w.Stats = GetStats()
+		w.Stats = stats.GetStats()
 		w.Stats.TaskCount = w.TaskCount
 		time.Sleep(15 * time.Second)
 	}
