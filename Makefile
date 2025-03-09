@@ -1,3 +1,3 @@
-.PHONY
+.PHONY: run
 run:
 	CUBE_WORKER_HOST=localhost CUBE_WORKER_PORT=5555 CUBE_MANAGER_HOST=localhost CUBE_MANAGER_PORT=5556 go run main.go
