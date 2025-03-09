@@ -33,17 +33,17 @@ type Manager struct {
 	Scheduler   scheduler.Scheduler
 }
 
-func (m *Manager) SelectWorker() string {
-	var newWorker int
-	if m.LastWorker+1 < len(m.Workers) {
-		newWorker = m.LastWorker + 1
-		m.LastWorker++
-	} else {
-		newWorker = 0
-		m.LastWorker = 0
+func (m *Manager) SelectWorker(t task.Task) (*node.Node, error) {
+	candidates := m.Scheduler.SelectCandidateNodes(t, m.WorkerNodes)
+	if candidates == nil {
+		msg := fmt.Sprintf("No available candidates match resource request for task %v", t.ID)
+		err := errors.New(msg)
+		return nil, err
 	}
+	scores := m.Scheduler.Score(t, candidates)
+	selectedNode := m.Scheduler.Pick(scores, candidates)
 
-	return m.Workers[newWorker]
+	return selectedNode, nil
 }
 
 func (m *Manager) updateTasks() {
