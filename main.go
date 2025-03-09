@@ -36,7 +36,7 @@ func main() {
 	}
 	wapi2 := worker.Api{
 		Address: whost,
-		Port:    wport,
+		Port:    wport + 1,
 		Worker:  &w2,
 	}
 	w3 := worker.Worker{
@@ -45,7 +45,7 @@ func main() {
 	}
 	wapi3 := worker.Api{
 		Address: whost,
-		Port:    wport,
+		Port:    wport + 2,
 		Worker:  &w3,
 	}
 
