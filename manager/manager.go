@@ -318,3 +318,27 @@ func (m *Manager) DoHealthChecks() {
 		time.Sleep(60 * time.Second)
 	}
 }
+
+func (m *Manager) stopTask(worker string, taskID string) {
+	client := &http.Client{}
+
+	url := fmt.Sprintf("http://%s/tasks/%s", worker, taskID)
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		log.Printf("error creating request to delete task %s: %v\n", taskID, err)
+		return
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("error connecting to worker at %s: %v\n", url, err)
+		return
+	}
+
+	if resp.StatusCode != 204 {
+		log.Printf("Error sending request: %v\n", err)
+		return
+	}
+
+	log.Printf("task %s has been scheduled to be stopped", taskID)
+}
