@@ -1,5 +1,7 @@
 package node
 
+import "beleap.dev/cube/stats"
+
 type Node struct {
 	Name            string
 	Ip              string
@@ -9,6 +11,7 @@ type Node struct {
 	MemoryAllocated int64
 	Disk            int64
 	DiskAllocated   int64
+	Stats           stats.Stats
 	Role            string
 	TaskCount       int
 }
