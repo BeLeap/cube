@@ -10,7 +10,6 @@ import (
 
 	"beleap.dev/cube/stats"
 	"beleap.dev/cube/utils"
-	"github.com/docker/docker/pkg/ioutils"
 )
 
 type Node struct {
