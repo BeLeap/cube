@@ -1,10 +1,16 @@
 package scheduler
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"log"
 	"math"
+	"net/http"
 	"time"
 
 	"beleap.dev/cube/node"
+	"beleap.dev/cube/stats"
 	"beleap.dev/cube/task"
 )
 
@@ -25,10 +31,33 @@ const (
 	LIEB = 1.53960071783900203869
 )
 
+func calculateLoad(usage float64, capacity float64) float64 {
+	return usage / capacity
+}
+
+func getNodeStats(node *node.Node) *stats.Stats {
+	url := fmt.Sprintf("%s/stats", node.Api)
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Printf("Error connecting to %v: %v", node.Api, err)
+	}
+
+	if resp.StatusCode != 200 {
+		log.Printf("Error retrieving stats from %v: %v", node.Api, err)
+	}
+
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+	var stats stats.Stats
+	json.Unmarshal(body, &stats)
+
+	return &stats
+}
+
 func calculateCpuUsage(node *node.Node) *float64 {
-	stat1 := node.Stats
+	stat1 := getNodeStats(node)
 	time.Sleep(3 * time.Second)
-	stat2 := node.Stats
+	stat2 := getNodeStats(node)
 
 	stat1Idle := stat1.CpuStats.Idle + stat1.CpuStats.IOWait
 	stat2Idle := stat2.CpuStats.Idle + stat2.CpuStats.IOWait
@@ -58,7 +87,7 @@ func (e *Epvm) Score(t task.Task, nodes []*node.Node) map[string]float64 {
 
 	for _, node := range nodes {
 		cpuUsage := calculateCpuUsage(node)
-		cpuLoad := calculateLoad(cpuUsage, math.Pow(2, 0.8))
+		cpuLoad := calculateLoad(*cpuUsage, math.Pow(2, 0.8))
 
 		memoryAllocated := float64(node.Stats.MemUsedKb())
 		memoryPercentAllocated := memoryAllocated / float64(node.Memory)
