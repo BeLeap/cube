@@ -24,7 +24,21 @@ type Epvm struct {
 
 // Pick implements Scheduler.
 func (e *Epvm) Pick(scores map[string]float64, candidates []*node.Node) *node.Node {
-	panic("unimplemented")
+	minCost := 0.00
+	var bestNode *node.Node
+	for idx, node := range candidates {
+		if idx == 0 {
+			minCost = scores[node.Name]
+			bestNode = node
+			continue
+		}
+
+		if scores[node.Name] < minCost {
+			minCost = scores[node.Name]
+			bestNode = node
+		}
+	}
+	return bestNode
 }
 
 const (
