@@ -68,10 +68,16 @@ func getNodeStats(node *node.Node) *stats.Stats {
 	return &stats
 }
 
-func calculateCpuUsage(node *node.Node) *float64 {
-	stat1 := getNodeStats(node)
+func calculateCpuUsage(node *node.Node) (*float64, error) {
+	stat1, err := node.GetStats()
+	if err != nil {
+		return nil, err
+	}
 	time.Sleep(3 * time.Second)
-	stat2 := getNodeStats(node)
+	stat2, err := node.GetStats()
+	if err != nil {
+		return nil, err
+	}
 
 	stat1Idle := stat1.CpuStats.Idle + stat1.CpuStats.IOWait
 	stat2Idle := stat2.CpuStats.Idle + stat2.CpuStats.IOWait
@@ -91,7 +97,7 @@ func calculateCpuUsage(node *node.Node) *float64 {
 	} else {
 		cpuPercentUsage = (float64(total) - float64(idle)) / float64(total)
 	}
-	return &cpuPercentUsage
+	return &cpuPercentUsage, nil
 }
 
 // Score implements Scheduler.
@@ -100,7 +106,11 @@ func (e *Epvm) Score(t task.Task, nodes []*node.Node) map[string]float64 {
 	maxJobs := 4.0
 
 	for _, node := range nodes {
-		cpuUsage := calculateCpuUsage(node)
+		cpuUsage, err := calculateCpuUsage(node)
+		if err != nil {
+			log.Printf("error calculating CPU usage for node %s, skipping: %v", node.Name, err)
+			continue
+		}
 		cpuLoad := calculateLoad(*cpuUsage, math.Pow(2, 0.8))
 
 		memoryAllocated := float64(node.Stats.MemUsedKb())
